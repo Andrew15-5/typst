@@ -119,6 +119,9 @@ fn typeset(
     let mut iter = 0;
     let mut document = Document::default();
 
+    dbg!(content);
+    dbg!(styles);
+
     // Relayout until all introspections stabilize.
     // If that doesn't happen within five attempts, we give up.
     loop {

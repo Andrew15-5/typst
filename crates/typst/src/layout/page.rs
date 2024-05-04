@@ -19,7 +19,7 @@ use crate::layout::{
 };
 
 use crate::model::Numbering;
-use crate::text::TextElem;
+use crate::text::{TextElem, TextItem};
 use crate::util::{NonZeroExt, Numeric, Scalar};
 use crate::visualize::Paint;
 
@@ -388,8 +388,12 @@ impl Packed<PageElem> {
         let mut regions = Regions::repeat(area, area.map(Abs::is_finite));
         regions.root = true;
 
+        dbg!(&child);
+
         // Layout the child.
         let mut frames = child.layout(engine, styles, regions)?.into_frames();
+
+        dbg!(&frames);
 
         // Align the child to the pagebreak's parity.
         // Check for page count after adding the pending frames
@@ -502,6 +506,14 @@ impl Packed<PageElem> {
             }
 
             page_counter.visit(engine, &frame)?;
+            dbg!("pushing frame into page");
+            for item in frame.items() {
+                if let crate::layout::frame::FrameItem::Text(TextItem { size, .. }) =
+                    item.1.clone()
+                {
+                    dbg!(size);
+                };
+            }
             pages.push(Page {
                 frame,
                 numbering: numbering.clone(),

@@ -197,6 +197,7 @@ impl LayoutRoot for Content {
             };
             let arenas = Arenas::default();
             let (document, styles) = realize_root(&mut engine, &arenas, content, styles)?;
+            dbg!(&document, styles);
             document.layout_root(&mut engine, styles)
         }
 
@@ -250,6 +251,8 @@ impl LayoutMultiple for Content {
             let arenas = Arenas::default();
             let (realized, styles) =
                 realize_block(&mut engine, &arenas, content, styles)?;
+            dbg!("child.layout()");
+            dbg!(styles);
             realized.with::<dyn LayoutMultiple>().unwrap().layout(
                 &mut engine,
                 styles,
@@ -267,6 +270,8 @@ impl LayoutMultiple for Content {
             styles,
             regions,
         )?;
+
+        dbg!(&fragment);
 
         engine.locator.visit_frames(&fragment);
         Ok(fragment)

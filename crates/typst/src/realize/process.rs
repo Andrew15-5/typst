@@ -47,19 +47,36 @@ pub fn process(
     target: &Content,
     styles: StyleChain,
 ) -> SourceResult<Option<Content>> {
+    let is_context = target.to_packed::<crate::foundations::ContextElem>().is_some();
     let Some(Verdict { prepared, mut map, step }) = verdict(engine, target, styles)
     else {
+        if is_context {
+            dbg!("context in process() after verdict(): none");
+            dbg!(target);
+        }
         return Ok(None);
     };
 
     // Create a fresh copy that we can mutate.
     let mut target = target.clone();
 
+    if is_context {
+        dbg!("context in process() after verdict()");
+        dbg!(&target);
+        dbg!(prepared, &map);
+    }
+
     // If the element isn't yet prepared (we're seeing it for the first time),
     // prepare it.
     let mut meta = None;
     if !prepared {
         meta = prepare(engine, &mut target, &mut map, styles)?;
+    }
+
+    if is_context {
+        dbg!("after prepare()");
+        dbg!(&target);
+        dbg!(&meta, &map);
     }
 
     // Apply a step, if there is one.
@@ -75,6 +92,11 @@ pub fn process(
         }
         None => target,
     };
+
+    if is_context {
+        dbg!("after delayed()");
+        dbg!(&output);
+    }
 
     // If necessary, apply metadata generated in the preparation.
     if let Some(meta) = meta {

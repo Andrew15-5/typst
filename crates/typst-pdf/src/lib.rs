@@ -199,6 +199,7 @@ fn write_catalog(ctx: &mut PdfContext, ident: Smart<&str>, timestamp: Option<Dat
     // Write the document information.
     let mut info = ctx.pdf.document_info(ctx.alloc.bump());
     let mut xmp = XmpWriter::new();
+    dbg!(&ctx.document.title);
     if let Some(title) = &ctx.document.title {
         info.title(TextStr(title));
         xmp.title([(None, title.as_str())]);

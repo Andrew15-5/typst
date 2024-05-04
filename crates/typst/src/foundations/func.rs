@@ -283,27 +283,37 @@ impl Func {
     ) -> SourceResult<Value> {
         match &self.repr {
             Repr::Native(native) => {
+                dbg!("native");
                 let value = (native.function)(engine, context, &mut args)?;
                 args.finish()?;
                 Ok(value)
             }
             Repr::Element(func) => {
+                dbg!("element");
                 let value = func.construct(engine, &mut args)?;
                 args.finish()?;
                 Ok(Value::Content(value))
             }
-            Repr::Closure(closure) => crate::eval::call_closure(
-                self,
-                closure,
-                engine.world,
-                engine.introspector,
-                engine.route.track(),
-                engine.locator.track(),
-                TrackedMut::reborrow_mut(&mut engine.tracer),
-                context,
-                args,
-            ),
+            Repr::Closure(closure) => {
+                dbg!("closure");
+                // dbg!(closure);
+                // dbg!(self);
+                // dbg!(context);
+                // dbg!(&args);
+                crate::eval::call_closure(
+                    self,
+                    closure,
+                    engine.world,
+                    engine.introspector,
+                    engine.route.track(),
+                    engine.locator.track(),
+                    TrackedMut::reborrow_mut(&mut engine.tracer),
+                    context,
+                    args,
+                )
+            },
             Repr::With(with) => {
+                dbg!("with");
                 args.items = with.1.items.iter().cloned().chain(args.items).collect();
                 with.0.call(engine, context, args)
             }

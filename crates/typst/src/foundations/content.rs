@@ -377,10 +377,16 @@ impl Content {
             return self;
         }
 
+        dbg!("Appling styles");
+        dbg!(&styles);
         if let Some(style_elem) = self.to_packed_mut::<StyledElem>() {
             style_elem.styles.apply(styles);
+            dbg!(Some(style_elem));
+            dbg!(&self);
             self
         } else {
+            dbg!("None");
+            dbg!(std::convert::Into::<Content>::into(StyledElem::new(self.clone(), styles.clone())));
             StyledElem::new(self, styles).into()
         }
     }

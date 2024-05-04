@@ -286,6 +286,8 @@ pub(crate) fn call_closure(
         None => (None, ast::Params::default(), closure.node.cast().unwrap()),
     };
 
+    dbg!(name, params, body);
+
     // Don't leak the scopes from the call site. Instead, we use the scope
     // of captured variables we collected earlier.
     let mut scopes = Scopes::new(None);
@@ -361,6 +363,7 @@ pub(crate) fn call_closure(
 
     // Handle control flow.
     let output = body.eval(&mut vm)?;
+    dbg!(&output);
     match vm.flow {
         Some(FlowEvent::Return(_, Some(explicit))) => return Ok(explicit),
         Some(FlowEvent::Return(_, None)) => {}

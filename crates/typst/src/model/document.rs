@@ -83,15 +83,20 @@ impl LayoutRoot for Packed<DocumentElem> {
         let mut iter = children.iter().peekable();
 
         while let Some(mut child) = iter.next() {
+            dbg!("layout_root()");
+            dbg!(child);
+
             let outer = styles;
             let mut styles = styles;
             if let Some(styled) = child.to_packed::<StyledElem>() {
                 child = &styled.child;
+                dbg!("updating styles");
                 styles = outer.chain(&styled.styles);
             }
 
             if let Some(page) = child.to_packed::<PageElem>() {
                 let extend_to = iter.peek().and_then(|&next| {
+                    dbg!(next);
                     *next
                         .to_packed::<StyledElem>()
                         .map_or(next, |styled| &styled.child)
@@ -104,6 +109,9 @@ impl LayoutRoot for Packed<DocumentElem> {
                 bail!(child.span(), "unexpected document child");
             }
         }
+
+        dbg!(styles);
+        dbg!(DocumentElem::title_in(styles));
 
         Ok(Document {
             pages,

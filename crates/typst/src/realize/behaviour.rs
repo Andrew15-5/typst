@@ -126,6 +126,8 @@ impl<'a> BehavedBuilder<'a> {
     /// Return the built content (possibly styled with local styles) plus a
     /// trunk style chain and a span for the collection.
     pub fn finish<F: From<Content>>(self) -> (Vec<F>, StyleChain<'a>, Span) {
+        dbg!("BehavedBuilder::finish()");
+        dbg!(&self.buf);
         let (output, trunk, span) = self.finish_iter();
         let output = output.map(|(c, s)| c.clone().styled_with_map(s).into()).collect();
         (output, trunk, span)
@@ -192,11 +194,14 @@ impl<'a> BehavedBuilder<'a> {
 
     /// Determine the shared trunk style chain.
     fn determine_style_trunk(&self) -> (StyleChain<'a>, usize) {
+        dbg!("determine_style_trunk()");
+        dbg!(&self.buf);
         // Determine shared style depth and first span.
         let mut trunk = match self.buf.first() {
             Some(&(_, chain)) => chain,
             None => Default::default(),
         };
+        dbg!(trunk);
 
         let mut depth = trunk.links().count();
         for (_, mut chain) in &self.buf {

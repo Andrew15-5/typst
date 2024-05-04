@@ -23,12 +23,16 @@ pub trait Store<'a> {
 
 impl<'a> Store<'a> for Content {
     fn store(self, arenas: &'a Arenas<'a>) -> &'a Self {
+        // dbg!("store() for Content");
         arenas.content.alloc(self)
     }
 }
 
 impl<'a> Store<'a> for StyleChain<'a> {
     fn store(self, arenas: &'a Arenas<'a>) -> &'a Self {
-        arenas.chains.alloc(self)
+        dbg!("store() for StyleChain");
+        let out = arenas.chains.alloc(self);
+        dbg!(&out);
+        out
     }
 }

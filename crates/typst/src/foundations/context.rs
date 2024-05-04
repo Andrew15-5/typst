@@ -80,6 +80,11 @@ impl Show for Packed<ContextElem> {
     fn show(&self, engine: &mut Engine, styles: StyleChain) -> SourceResult<Content> {
         let loc = self.location().unwrap();
         let context = Context::new(Some(loc), Some(styles));
-        Ok(self.func.call::<[Value; 0]>(engine, context.track(), [])?.display())
+        let value = self.func.call::<[Value; 0]>(engine, context.track(), [])?;
+        dbg!(&value);
+        let display = value.display();
+        dbg!(&display);
+        Ok(display)
+        // Ok(self.func.call::<[Value; 0]>(engine, context.track(), [])?.display())
     }
 }

@@ -4,6 +4,8 @@ mod arenas;
 mod behaviour;
 mod process;
 
+use typst_syntax::ast::{Expr, SetRule};
+
 pub use self::arenas::Arenas;
 pub use self::behaviour::{Behave, BehavedBuilder, Behaviour};
 pub use self::process::{process, processable};
@@ -15,7 +17,7 @@ use std::mem;
 use crate::diag::{bail, SourceResult};
 use crate::engine::{Engine, Route};
 use crate::foundations::{
-    Content, NativeElement, Packed, SequenceElem, StyleChain, StyledElem, Styles,
+    Content, ContextElem, Element, NativeElement, NativeElementData, Packed, SequenceElem, Set, Style, StyleChain, StyledElem, Styles
 };
 use crate::introspection::MetaElem;
 use crate::layout::{
@@ -25,10 +27,11 @@ use crate::layout::{
 use crate::math::{EquationElem, LayoutMath};
 use crate::model::{
     CiteElem, CiteGroup, DocumentElem, EnumElem, EnumItem, ListElem, ListItem, ParElem,
-    ParbreakElem, TermItem, TermsElem,
+    ParbreakElem, TermItem, TermsElem
 };
 use crate::syntax::Span;
 use crate::text::{LinebreakElem, SmartQuoteElem, SpaceElem, TextElem};
+use crate::util::Static;
 
 /// Realize into an element that is capable of root-level layout.
 #[typst_macros::time(name = "realize root")]
@@ -38,6 +41,8 @@ pub fn realize_root<'a>(
     content: &'a Content,
     styles: StyleChain<'a>,
 ) -> SourceResult<(Packed<DocumentElem>, StyleChain<'a>)> {
+    dbg!("realize_root()");
+    dbg!(content);
     let mut builder = Builder::new(engine, arenas, true);
     builder.accept(content, styles)?;
     builder.interrupt_page(Some(styles), true)?;
@@ -103,6 +108,18 @@ impl<'a, 'v, 't> Builder<'a, 'v, 't> {
         mut content: &'a Content,
         styles: StyleChain<'a>,
     ) -> SourceResult<()> {
+        dbg!("accept()");
+        // dbg!(content.elem().name(), content.elem(), content);
+        // content.elem().name();
+        // if content.elem().name() == "styled" {
+        if content.to_packed::<StyledElem>().is_some() {
+            dbg!("set rule");
+            dbg!(content);
+        }
+        if content.to_packed::<ContextElem>().is_some() {
+            dbg!("context");
+            dbg!(content);
+        }
         if content.can::<dyn LayoutMath>() && !content.is::<EquationElem>() {
             content = self
                 .arenas
@@ -119,6 +136,7 @@ impl<'a, 'v, 't> Builder<'a, 'v, 't> {
             }
             let result = self.accept(self.arenas.store(realized), styles);
             self.engine.route.decrease();
+            dbg!("accept(): realized");
             return result;
         }
 
@@ -127,6 +145,7 @@ impl<'a, 'v, 't> Builder<'a, 'v, 't> {
         }
 
         if let Some(sequence) = content.to_packed::<SequenceElem>() {
+            dbg!("accept(): sequence");
             for elem in &sequence.children {
                 self.accept(elem, styles)?;
             }
@@ -183,8 +202,11 @@ impl<'a, 'v, 't> Builder<'a, 'v, 't> {
         styled: &'a StyledElem,
         styles: StyleChain<'a>,
     ) -> SourceResult<()> {
+        dbg!("Builder::styled()");
         let stored = self.arenas.store(styles);
         let styles = stored.chain(&styled.styles);
+        dbg!("styles after chain()");
+        dbg!(&styles);
         self.interrupt_style(&styled.styles, None)?;
         self.accept(&styled.child, styles)?;
         self.interrupt_style(&styled.styles, Some(styles))?;
@@ -200,6 +222,7 @@ impl<'a, 'v, 't> Builder<'a, 'v, 't> {
             let Some(doc) = &self.doc else {
                 bail!(span, "document set rules are not allowed inside of containers");
             };
+            dbg!("inside interrupt_style");
             if outer.is_none()
                 && (!doc.pages.is_empty()
                     || !self.flow.0.is_empty()
@@ -325,6 +348,8 @@ impl<'a> DocBuilder<'a> {
     }
 
     fn finish(self) -> (Packed<DocumentElem>, StyleChain<'a>) {
+        dbg!("DocBuilder::finish()");
+        dbg!(&self.pages);
         let (children, trunk, span) = self.pages.finish();
         (Packed::new(DocumentElem::new(children)).spanned(span), trunk)
     }
