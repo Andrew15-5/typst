@@ -8,6 +8,8 @@ mod csv_;
 mod json_;
 #[path = "read.rs"]
 mod read_;
+#[path = "entrypoint.rs"]
+mod entrypoint_;
 #[path = "toml.rs"]
 mod toml_;
 #[path = "xml.rs"]
@@ -19,6 +21,7 @@ pub use self::cbor_::*;
 pub use self::csv_::*;
 pub use self::json_::*;
 pub use self::read_::*;
+pub use self::entrypoint_::*;
 pub use self::toml_::*;
 pub use self::xml_::*;
 pub use self::yaml_::*;
@@ -36,6 +39,7 @@ pub static DATA_LOADING: Category;
 pub(super) fn define(global: &mut Scope) {
     global.category(DATA_LOADING);
     global.define_func::<read>();
+    global.define_func::<entrypoint>();
     global.define_func::<csv>();
     global.define_func::<json>();
     global.define_func::<toml>();
